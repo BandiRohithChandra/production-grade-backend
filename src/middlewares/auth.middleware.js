@@ -5,10 +5,11 @@ import { User } from "../models/user.model.js"
 
 export const verifyJwt = asyncHandler(async (req, _, next) => {
    try {
-    const token = req.cookies?.accessToken || req.header
-    ("Authorization")?.replace("Bearer ", "")
+    const token = req.cookies?.accessToken || req.headers
+    ["Authorization"]?.replace("Bearer ", "")
 
     if (!token) {
+        console.error("Token is missing");
         throw new ApiError(401, "unauthorized request")
     }
 

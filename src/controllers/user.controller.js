@@ -4,7 +4,7 @@ import {User} from "../models/user.model.js"
 import uploadOnCloudinary from "../utils/cloudinary.js"
 import ApiResponse from '../utils/ApiResponse.js'
 import jwt from "jsonwebtoken"
-
+import mongoose from "mongoose"
 
 const generateAccessAndRefereshTokens = async(userId) => {
     try {
@@ -170,8 +170,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1       //this removes the field from the document
             }
         },
         {
@@ -186,8 +186,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 
     return res
     .status(200)
-    .clearCookie("accessToken", accessToken, options)
-    .clearCookie("refreshToken", refreshToken, options)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User Logged out"))
 })
 
@@ -222,8 +222,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     
         return res
         .status(200)
-        .cookie("access token", accessToken, options)
-        .cookie("refresh token", newRefreshToken, options)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
         .json(
             new ApiResponse(
                 200, 
@@ -451,7 +451,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     )
 })
 
-const getWatchHistory = asyncHandler(asyn (req, res) => {
+const getWatchHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: {
